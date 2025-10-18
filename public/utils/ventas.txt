@@ -1,0 +1,45 @@
+-- --------------------------------------------------------------------
+-- Archivo: ventas_y_detalle.sql
+-- Descripción: Script para crear las tablas de Ventas y Detalle de Ventas.
+-- --------------------------------------------------------------------
+
+-- Tabla de Ventas
+-- Almacena los datos generales de cada transacción.
+CREATE TABLE IF NOT EXISTS ventas (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    cliente_id BIGINT UNSIGNED NOT NULL,
+    tipo_comprobante VARCHAR(255) NOT NULL DEFAULT 'Factura',
+    numero_comprobante VARCHAR(255) UNIQUE,
+    condicion_pago VARCHAR(255) NOT NULL DEFAULT 'Contado',
+    importe_neto DECIMAL(10, 2) NOT NULL,
+    importe_iva DECIMAL(10, 2) NOT NULL,
+    importe_total DECIMAL(10, 2) NOT NULL,
+    estado_venta VARCHAR(255) NOT NULL DEFAULT 'Pagada',
+    observaciones TEXT,
+    fecha_venta DATE NOT NULL,
+    visible TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    -- Clave foránea que relaciona cada venta con un cliente.
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Tabla de Detalle de Ventas
+-- Almacena cada línea de producto dentro de una venta.
+CREATE TABLE IF NOT EXISTS detalle_ventas (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    venta_id BIGINT UNSIGNED NOT NULL,
+    producto_id BIGINT UNSIGNED NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(8, 2) NOT NULL,
+    descuento DECIMAL(8, 2) NOT NULL DEFAULT 0.00,
+    subtotal DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    -- Clave foránea que relaciona el detalle con la venta principal.
+    FOREIGN KEY (venta_id) REFERENCES ventas(id) ON DELETE CASCADE,
+    -- Clave foránea que relaciona el detalle con el producto vendido.
+    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+

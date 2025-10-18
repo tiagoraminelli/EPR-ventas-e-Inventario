@@ -1,0 +1,45 @@
+
+        /* Regla para garantizar que la clase text-black funcione correctamente */
+            .text-black-force {
+            color: #000;
+        }
+
+        /* Estilo para texto con degradado multicromático */
+        .text-gradient-multicolor {
+            background-image: linear-gradient(to right,
+                    #FF5733, #FFBD33, #75FF33, #33FFBD, #33A1FF, #7533FF, #FF33BD);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        /* Estilo personalizado para los botones */
+        .bg-blue-custom-100{
+            background-color: #52AAD9;
+        }
+
+        /* Estilos personalizados para Select2 para que se adapten mejor al diseño */
+        .select2-container--default .select2-selection--single {
+            border-radius: 9999px;
+            /* rounded-full */
+            border: 1px solid #d1d5db;
+            /* border-gray-300 */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            /* shadow-sm */
+            height: 48px;
+            /* py-3 */
+            padding: 10px 20px 10px 20px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 46px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px;
+            padding-left: 0.75rem;
+            /* pl-3 */
+        }
+

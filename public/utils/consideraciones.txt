@@ -1,0 +1,3 @@
+cuando se actualiza una venta con la leyenda: PAGADA.
+es que se aprobo para su descuento en el stock de producto
+
