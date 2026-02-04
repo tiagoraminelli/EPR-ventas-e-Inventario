@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Marca;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -65,7 +66,7 @@ class ProductController extends Controller
         }
 
         // Ordena y pagina
-        $products = $query->orderBy('nombre', 'asc')->paginate(10)->withQueryString();
+        $products = $query->orderBy('nombre', 'asc')->paginate(12)->withQueryString();
 
         // Obtener todas las categorías y marcas para los selects
         $categorias = Category::all();
@@ -78,6 +79,7 @@ class ProductController extends Controller
 
     /**
      * Muestra el formulario para crear un nuevo producto.
+     * Ajustamos para el manejo de imagenes más adelante.
      */
     public function create()
     {
@@ -102,6 +104,7 @@ class ProductController extends Controller
             'precio' => 'required|numeric|not_in:0', // en el front se coloca el porcentaje, no el precio final
             'stock' => 'nullable|integer',
             'url_imagen' => 'nullable|string|max:255',
+            'imagen' => 'nullable|image|max:2048', // 2MB
             'categoria_id' => 'required|exists:categorias,id',
             'sub_categoria' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
@@ -117,6 +120,12 @@ class ProductController extends Controller
         // ⚠️ Nota: estamos usando el campo 'precio' como porcentaje de ganancia solo en la creación.
         // A futuro convendría renombrar este campo a 'ganancia_porcentual' para mayor claridad.
         $data['precio'] = $data['precio_proveedor'] * (1 + ($data['precio'] / 100));
+
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('productos', 'public');
+            $data['url_imagen'] = $path;
+        }
+
 
         // Crea el producto
         $product = Product::create($data);
@@ -149,10 +158,8 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Busca el producto a actualizar.
         $product = Product::findOrFail($id);
 
-        // Reglas de validación, ignorando el ID del producto actual.
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255|min:3',
             'descripcion' => 'nullable|string|min:5',
@@ -160,22 +167,55 @@ class ProductController extends Controller
             'precio' => 'required|numeric|gt:precio_proveedor|not_in:0',
             'stock' => 'nullable|integer',
             'url_imagen' => 'nullable|string',
+            'imagen' => 'nullable|image|max:2048',
             'categoria_id' => 'required|exists:categorias,id',
             'sub_categoria' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
             'visible' => 'boolean',
+        ], [
+            'precio.gt' => 'El precio de venta debe ser mayor que el precio del proveedor.',
+            'precio.not_in' => 'El precio de venta no puede ser cero.',
+            'precio_proveedor.not_in' => 'El precio del proveedor no puede ser cero.',
+            'imagen.max' => 'La imagen no debe superar los 2MB.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Actualiza el producto con los datos validados.
-        $product->update($validator->validated());
+        $data = $validator->validated();
 
-        // Redirige al dashboard con un mensaje de éxito.
-        return redirect()->route('products.index')->with('success', 'Producto actualizado exitosamente.');
+        // 🔽 VALIDACIÓN DE IMAGEN DUPLICADA
+        if ($request->hasFile('imagen')) {
+
+            $nuevaImagen = $request->file('imagen');
+
+            $guardarImagen = true;
+
+            if ($product->url_imagen && Storage::disk('public')->exists($product->url_imagen)) {
+
+                $hashActual = md5_file(storage_path('app/public/' . $product->url_imagen));
+                $hashNueva  = md5_file($nuevaImagen->getRealPath());
+
+                // Si son iguales → NO guardar
+                if ($hashActual === $hashNueva) {
+                    $guardarImagen = false;
+                }
+            }
+
+            if ($guardarImagen) {
+                $path = $nuevaImagen->store('productos', 'public');
+                $data['url_imagen'] = $path;
+            }
+        }
+
+        $product->update($data);
+
+        return redirect()->route('products.index')
+            ->with('success', 'Producto actualizado exitosamente.');
     }
+
 
     /**
      * Elimina un producto de la base de datos.

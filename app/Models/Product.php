@@ -31,10 +31,16 @@ class Product extends Model
         'visible',
     ];
 
+    /**
+        * Indica si el modelo debe usar marcas de tiempo.
+     */
+
+
 
 
     /**
      * Obtiene la categoría a la que pertenece el producto.
+     *
      */
 
     public $timestamps = false;

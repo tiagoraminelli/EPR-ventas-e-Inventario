@@ -1,46 +1,38 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Producto</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
-    <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-    <style>
-        .select2-container .select2-selection--single {
-            height: 42px; /* Aumenta la altura para que coincida con los inputs */
-            display: flex;
-            align-items: center;
-            border-radius: 0.375rem; /* Esquinas redondeadas */
-            border-color: #d1d5db; /* Color de borde */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Sombra sutil */
-        }
-    </style>
 </head>
 
-<body class="bg-gray-100 p-4 font-sans">
-    <!-- Layout principal -->
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <x-admin-nav />
-        <div class="flex-1 container mx-auto bg-white p-8 rounded-xl shadow-lg">
-            <div class="flex justify-between items-center mb-6 border-b pb-4">
-                <h1 class="text-3xl font-bold text-gray-800">Editar Producto: <span class="text-blue-600">{{ $product->nombre }}</span></h1>
+<body class="bg-gray-100 min-h-screen">
+
+<div class="flex">
+    <x-admin-nav />
+
+    <main class="flex-1 p-6">
+        <div class="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
+
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <h1 class="text-xl font-semibold text-gray-800">
+                    Editar producto · <span class="text-blue-600">{{ $product->nombre }}</span>
+                </h1>
+
                 <a href="{{ route('products.index') }}"
-                    class="px-4 py-2 text-blue-600 bg-blue-100 rounded-lg font-semibold hover:bg-blue-200 transition duration-300">
-                    <i class="fas fa-arrow-left mr-2"></i> Volver al Dashboard
+                   class="text-sm text-black-600 hover:underline">
+                    ← Volver
                 </a>
             </div>
 
+            <!-- Errores -->
             @if ($errors->any())
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg" role="alert">
-                    <p class="font-bold">¡Error!</p>
-                    <ul class="mt-2 list-disc list-inside">
+                <div class="mb-4 text-sm text-red-600">
+                    <ul class="list-disc list-inside">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -48,78 +40,84 @@
                 </div>
             @endif
 
-            <form action="{{ route('products.update', $product->id) }}" method="POST" class="space-y-6">
+            <!-- Form -->
+            <form action="{{ route('products.update', $product->id) }}"
+                  method="POST"
+                  enctype="multipart/form-data"
+                  class="space-y-5">
+
                 @csrf
                 @method('PUT')
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Nombre / Subcategoría -->
+                <div class="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-1">Nombre</label>
-                        <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $product->nombre) }}"
-                            class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                            required>
+                        <label class="text-sm text-gray-600">Nombre</label>
+                        <input type="text" name="nombre"
+                               value="{{ old('nombre', $product->nombre) }}"
+                               class="w-full border rounded px-3 py-2 text-sm"
+                               required>
                     </div>
 
                     <div>
-                        <label for="sub_categoria" class="block text-sm font-semibold text-gray-700 mb-1">Sub Categoría</label>
-                        <input type="text" name="sub_categoria" id="sub_categoria" value="{{ old('sub_categoria', $product->sub_categoria) }}"
-                            class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+                        <label class="text-sm text-gray-600">Subcategoría</label>
+                        <input type="text" name="sub_categoria"
+                               value="{{ old('sub_categoria', $product->sub_categoria) }}"
+                               class="w-full border rounded px-3 py-2 text-sm">
                     </div>
                 </div>
 
+                <!-- Descripción -->
                 <div>
-                    <label for="descripcion" class="block text-sm font-semibold text-gray-700 mb-1">Descripción</label>
-                    <textarea name="descripcion" id="descripcion" rows="3"
-                        class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">{{ old('descripcion', $product->descripcion) }}</textarea>
+                    <label class="text-sm text-gray-600">Descripción</label>
+                    <textarea name="descripcion" rows="3"
+                              class="w-full border rounded px-3 py-2 text-sm">{{ old('descripcion', $product->descripcion) }}</textarea>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Precios / Stock -->
+                <div class="grid md:grid-cols-3 gap-4">
                     <div>
-                        <label for="precio_proveedor" class="block text-sm font-semibold text-gray-700 mb-1">Precio Proveedor</label>
-                        <input type="number" name="precio_proveedor" id="precio_proveedor" step="0.01" value="{{ old('precio_proveedor', $product->precio_proveedor) }}"
-                            class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                            required>
+                        <label class="text-sm text-gray-600">Precio proveedor</label>
+                        <input type="number" step="0.01" name="precio_proveedor"
+                               value="{{ old('precio_proveedor', $product->precio_proveedor) }}"
+                               class="w-full border rounded px-3 py-2 text-sm">
                     </div>
+
                     <div>
-                        <label for="precio" class="block text-sm font-semibold text-gray-700 mb-1">Precio Venta</label>
-                        <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio', $product->precio) }}"
-                            class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                            required>
+                        <label class="text-sm text-gray-600">Precio venta</label>
+                        <input type="number" step="0.01" name="precio"
+                               value="{{ old('precio', $product->precio) }}"
+                               class="w-full border rounded px-3 py-2 text-sm">
                     </div>
+
                     <div>
-                        <label for="stock" class="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
-                        <input type="number" name="stock" id="stock" value="{{ old('stock', $product->stock) }}"
-                            class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                            required>
+                        <label class="text-sm text-gray-600">Stock</label>
+                        <input type="number" name="stock"
+                               value="{{ old('stock', $product->stock) }}"
+                               class="w-full border rounded px-3 py-2 text-sm">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Categoría / Marca -->
+                <div class="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label for="categoria_id" class="block text-sm font-semibold text-gray-700 mb-1">
-                            Categoría
-                        </label>
-                        <select name="categoria_id" id="categoria_id"
-                            class="select2 w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                            required>
-                            <option value="">Selecciona una categoría</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" @if(old('categoria_id', $product->categoria_id) == $category->id) selected @endif>
+                        <label class="text-sm text-gray-600">Categoría</label>
+                        <select name="categoria_id" class="select2 w-full">
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}"
+                                    @selected(old('categoria_id', $product->categoria_id) == $category->id)>
                                     {{ $category->nombre }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
+
                     <div>
-                        <label for="marca_id" class="block text-sm font-semibold text-gray-700 mb-1">
-                            Marca
-                        </label>
-                        <select name="marca_id" id="marca_id"
-                            class="select2 w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                            required>
-                            <option value="">Selecciona una marca</option>
-                            @foreach($marcas as $marca)
-                                <option value="{{ $marca->id }}" @if(old('marca_id', $product->marca_id) == $marca->id) selected @endif>
+                        <label class="text-sm text-gray-600">Marca</label>
+                        <select name="marca_id" class="select2 w-full">
+                            @foreach ($marcas as $marca)
+                                <option value="{{ $marca->id }}"
+                                    @selected(old('marca_id', $product->marca_id) == $marca->id)>
                                     {{ $marca->nombre }}
                                 </option>
                             @endforeach
@@ -127,39 +125,40 @@
                     </div>
                 </div>
 
+                <!-- Imagen -->
                 <div>
-                    <label for="url_imagen" class="block text-sm font-semibold text-gray-700 mb-1">URL de la Imagen</label>
-                    <input type="text" name="url_imagen" id="url_imagen" value="{{ old('url_imagen', $product->url_imagen) }}"
-                        class="w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+                    <label class="text-sm text-gray-600">Imagen</label>
+                    <input type="file" name="imagen" class="text-sm">
                 </div>
 
-                <div class="mt-4 flex items-center space-x-4">
+                <!-- Visible -->
+                <div class="flex items-center gap-2">
                     <input type="hidden" name="visible" value="0">
-                    <input type="checkbox" name="visible" id="visible" value="1" class="rounded text-blue-500 focus:ring-blue-500" @if(old('visible', $product->visible)) checked @endif>
-                    <label for="visible" class="text-sm font-semibold text-gray-700">Visible en la tienda</label>
+                    <input type="checkbox" name="visible" value="1"
+                           @checked(old('visible', $product->visible))>
+                    <span class="text-sm text-gray-700">Visible en tienda</span>
                 </div>
 
-                <div class="mt-8 flex justify-end">
+                <!-- Acciones -->
+                <div class="flex justify-end pt-4 border-t">
                     <button type="submit"
-                        class="px-8 py-3 bg-blue-600 text-white font-bold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <i class="fas fa-save mr-2"></i> Actualizar Producto
+                            class="px-5 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                        Guardar cambios
                     </button>
                 </div>
+
             </form>
         </div>
-    </div>
+    </main>
+</div>
 
-    <!-- Select2 JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.select2').select2({
-                placeholder: "Selecciona una opción",
-                allowClear: true,
-                width: '100%'
-            });
-        });
-    </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $('.select2').select2({
+        width: '100%'
+    });
+</script>
+
 </body>
 </html>
