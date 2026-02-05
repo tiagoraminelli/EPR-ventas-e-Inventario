@@ -46,6 +46,13 @@ class VentaController extends Controller
             });
         }
 
+        // Filtro por cliente
+        // Filtro por cliente específico
+        if ($request->filled('cliente_id')) {
+            $query->where('cliente_id', $request->cliente_id);
+        }
+
+
         // Filtro por estado de venta
         if ($request->filled('estado_venta')) {
             $query->where('estado_venta', $request->input('estado_venta'));
@@ -91,10 +98,11 @@ class VentaController extends Controller
             }
         }
 
+        $clientes = Cliente::orderBy('NombreCompleto')->get();
 
         $ventas = $query->with('cliente')->latest()->paginate(10)->withQueryString();
 
-        return view('admin.ventas.index', compact('ventas'));
+        return view('admin.ventas.index', compact('ventas', 'clientes'));
     }
 
 
