@@ -104,7 +104,7 @@ class ProductController extends Controller
             'precio' => 'required|numeric|not_in:0', // en el front se coloca el porcentaje, no el precio final
             'stock' => 'nullable|integer',
             'url_imagen' => 'nullable|string|max:255',
-            'imagen' => 'nullable|image|max:2048', // 2MB
+            'imagen' => 'nullable|image|max:4096', // 4B
             'categoria_id' => 'required|exists:categorias,id',
             'sub_categoria' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',

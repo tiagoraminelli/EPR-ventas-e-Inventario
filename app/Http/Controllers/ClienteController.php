@@ -54,13 +54,13 @@ class ClienteController extends Controller
             'RazonSocial' => 'nullable|string|max:100',
             'NombreCompleto' => 'nullable|string|max:100',
             // Nota: El campo 'CUIT/DNI' es único y se valida aquí.
-            'cuit_dni' => 'required|string|max:100|unique:clientes',
+            'cuit_dni' => 'nullable|string|max:100|unique:clientes',
             'Domicilio' => 'nullable|string|max:100',
             'Localidad' => 'nullable|string|max:100',
             'Detalle' => 'nullable|string|max:255',
             'Email' => 'required|email|unique:clientes',
             'Telefono' => 'nullable|string|max:50',
-            'TipoCliente' => 'required|in:Persona,Empresa',
+            'TipoCliente' => 'required|in:Persona,Empresa,Institucion Publica',
             'visible' => 'boolean|nullable',
         ]);
 
@@ -110,7 +110,7 @@ class ClienteController extends Controller
                 Rule::unique('clientes')->ignore($cliente->id),
             ],
             'Telefono' => 'nullable|string|max:50',
-            'TipoCliente' => 'required|in:Persona,Empresa',
+            'TipoCliente' => 'required|in:Persona,Empresa,Institucion Publica',
             'visible' => 'boolean',
         ]);
 

@@ -651,7 +651,7 @@
                         data-subcategoria="{{ $producto->sub_categoria }}"
                         data-marca="{{ $producto->marca->nombre ?? '' }}"
                         data-stock="{{ $producto->stock }}">
-                    {{ $producto->nombre }} | {{ $producto->sub_categoria }}
+                    {{ $producto->nombre }} | {{ $producto->sub_categoria }} | ${{ number_format($producto->precio, 2) }}
                 </option>
                 @endforeach
             </select>
