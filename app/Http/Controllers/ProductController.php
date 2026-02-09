@@ -15,66 +15,69 @@ class ProductController extends Controller
      * Muestra la lista de productos con paginación.
      */
 
-    public function index(Request $request)
-    {
-        // Obtiene los parámetros de búsqueda y filtros
-        $search = $request->query('search');
-        $categoriaFiltro = $request->query('categoria');
-        $marcaFiltro = $request->query('marca');
-        $filtroStock = $request->query('stock');
+public function index(Request $request)
+{
+    $search           = $request->query('search');
+    $categoriaFiltro  = $request->query('categoria');
+    $marcaFiltro      = $request->query('marca');
+    $stock            = $request->input('stock');
+    $stockOperator    = $request->input('stock_type', '=');
+    $withTrashed      = $request->boolean('with_trashed');
 
-        // Inicia la consulta del modelo Product con relaciones
-        $query = Product::with('categoria', 'marca')->where('visible', true);
+    $query = Product::with(['categoria', 'marca'])
+        ->when(!$withTrashed, fn ($q) => $q->where('visible', true))
 
-        // Filtro por búsqueda
-        if ($search) {
-            $query->where(function ($query) use ($search) {
-                $query->where('nombre', 'LIKE', "%{$search}%")
-                    ->orWhere('codigo', 'LIKE', "%{$search}%")
-                    ->orWhere('descripcion', 'LIKE', "%{$search}%")
-                    ->orWhere('stock', 'LIKE', "%{$search}%")
-                    ->orWhere('precio_proveedor', 'LIKE', "%{$search}%")
-                    ->orWhere('precio', 'LIKE', "%{$search}%")
-                    ->orWhere('sub_categoria', 'LIKE', "%{$search}%")
-                    ->orWhereHas('categoria', function ($query) use ($search) {
-                        $query->where('nombre', 'LIKE', "%{$search}%");
-                    })
-                    ->orWhereHas('marca', function ($query) use ($search) {
-                        $query->where('nombre', 'LIKE', "%{$search}%");
-                    });
+        // 🔍 Búsqueda general
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('codigo', 'like', "%{$search}%")
+                  ->orWhere('descripcion', 'like', "%{$search}%")
+                  ->orWhere('stock', 'like', "%{$search}%")
+                  ->orWhere('precio_proveedor', 'like', "%{$search}%")
+                  ->orWhere('precio', 'like', "%{$search}%")
+                  ->orWhere('sub_categoria', 'like', "%{$search}%")
+                  ->orWhereHas('categoria', fn ($q) =>
+                      $q->where('nombre', 'like', "%{$search}%")
+                  )
+                  ->orWhereHas('marca', fn ($q) =>
+                      $q->where('nombre', 'like', "%{$search}%")
+                  );
             });
-        }
+        })
 
-        // Filtro por categoría
-        if ($categoriaFiltro) {
-            $query->where('categoria_id', $categoriaFiltro);
-        }
+        // 📦 Categoría
+        ->when($categoriaFiltro, fn ($q) =>
+            $q->where('categoria_id', $categoriaFiltro)
+        )
 
+        // 🏷 Marca
+        ->when($marcaFiltro, fn ($q) =>
+            $q->where('marca_id', $marcaFiltro)
+        )
 
-        // Filtro por stock
-        if ($request->filled('stock')) {
-            $filtroStock = $request->input('stock');
-            $operador = $request->input('stock_type', '='); // por defecto "="
-            $query->where('stock', $operador, $filtroStock);
-        }
+        // 📊 Stock
+        ->when($request->filled('stock'), fn ($q) =>
+            $q->where('stock', $stockOperator, $stock)
+        );
 
+    $products = $query
+        ->orderBy('nombre')
+        ->paginate(12)
+        ->withQueryString();
 
+    $categorias = Category::all();
+    $marcas     = Marca::all();
 
-        // Filtro por marca
-        if ($marcaFiltro) {
-            $query->where('marca_id', $marcaFiltro);
-        }
-
-        // Ordena y pagina
-        $products = $query->orderBy('nombre', 'asc')->paginate(12)->withQueryString();
-
-        // Obtener todas las categorías y marcas para los selects
-        $categorias = Category::all();
-        $marcas = Marca::all();
-
-        // Retorna la vista con todo
-        return view('admin.products.index', compact('products', 'search', 'categorias', 'marcas', 'categoriaFiltro', 'marcaFiltro'));
-    }
+    return view('admin.products.index', compact(
+        'products',
+        'search',
+        'categorias',
+        'marcas',
+        'categoriaFiltro',
+        'marcaFiltro'
+    ));
+}
 
 
     /**
@@ -104,11 +107,37 @@ class ProductController extends Controller
             'precio' => 'required|numeric|not_in:0', // en el front se coloca el porcentaje, no el precio final
             'stock' => 'nullable|integer',
             'url_imagen' => 'nullable|string|max:255',
-            'imagen' => 'nullable|image|max:4096', // 4B
+            'imagen' => 'nullable|image|max:8192', // 8MB
             'categoria_id' => 'required|exists:categorias,id',
             'sub_categoria' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
             'visible' => 'boolean',
+        ],
+        [
+            'nombre.required' => 'El nombre del producto es obligatorio.',
+            'nombre.string' => 'El nombre del producto debe ser una cadena de texto.',
+            'nombre.max' => 'El nombre del producto no debe superar los 255 caracteres.',
+            'nombre.min' => 'El nombre del producto debe tener al menos 3 caracteres.',
+            'descripcion.string' => 'La descripción del producto debe ser una cadena de texto.',
+            'descripcion.min' => 'La descripción del producto debe tener al menos 5 caracteres.',
+            'precio_proveedor.required' => 'El precio del proveedor es obligatorio.',
+            'precio_proveedor.numeric' => 'El precio del proveedor debe ser un número.',
+            'precio_proveedor.not_in' => 'El precio del proveedor no puede ser cero.',
+            'precio.required' => 'El precio de venta es obligatorio.',
+            'precio.numeric' => 'El precio de venta debe ser un número.',
+            'precio_proveedor.gt' => 'El precio de venta debe ser mayor que el precio del proveedor.',
+            'precio.gt' => 'El precio de venta debe ser mayor que el precio del proveedor.',
+            'precio.not_in' => 'El precio de venta no puede ser cero.',
+            'precio_proveedor.not_in' => 'El precio del proveedor no puede ser cero.',
+            'imagen.max' => 'La imagen no debe superar los 8MB.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'categoria_id.required' => 'La categoría es obligatoria.',
+            'categoria_id.exists' => 'La categoría seleccionada no es válida.',
+            'sub_categoria.required' => 'La subcategoría es obligatoria.',
+            'sub_categoria.string' => 'La subcategoría debe ser una cadena de texto.',
+            'sub_categoria.max' => 'La subcategoría no debe superar los 255 caracteres.',
+            'marca_id.required' => 'La marca es obligatoria.',
+            'marca_id.exists' => 'La marca seleccionada no es válida.',
         ]);
 
         if ($validator->fails()) {
@@ -167,17 +196,36 @@ class ProductController extends Controller
             'precio' => 'required|numeric|gt:precio_proveedor|not_in:0',
             'stock' => 'nullable|integer',
             'url_imagen' => 'nullable|string',
-            'imagen' => 'nullable|image|max:2048',
+            'imagen' => 'nullable|image|max:8192',
             'categoria_id' => 'required|exists:categorias,id',
             'sub_categoria' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
             'visible' => 'boolean',
         ], [
+            'nombre.required' => 'El nombre del producto es obligatorio.',
+            'nombre.string' => 'El nombre del producto debe ser una cadena de texto.',
+            'nombre.max' => 'El nombre del producto no debe superar los 255 caracteres.',
+            'nombre.min' => 'El nombre del producto debe tener al menos 3 caracteres.',
+            'descripcion.string' => 'La descripción del producto debe ser una cadena de texto.',
+            'descripcion.min' => 'La descripción del producto debe tener al menos 5 caracteres.',
+            'precio_proveedor.required' => 'El precio del proveedor es obligatorio.',
+            'precio_proveedor.numeric' => 'El precio del proveedor debe ser un número.',
+            'precio_proveedor.not_in' => 'El precio del proveedor no puede ser cero.',
+            'precio.required' => 'El precio de venta es obligatorio.',
+            'precio.numeric' => 'El precio de venta debe ser un número.',
+            'precio_proveedor.gt' => 'El precio de venta debe ser mayor que el precio del proveedor.',
             'precio.gt' => 'El precio de venta debe ser mayor que el precio del proveedor.',
             'precio.not_in' => 'El precio de venta no puede ser cero.',
             'precio_proveedor.not_in' => 'El precio del proveedor no puede ser cero.',
-            'imagen.max' => 'La imagen no debe superar los 2MB.',
+            'imagen.max' => 'La imagen no debe superar los 8MB.',
             'imagen.image' => 'El archivo debe ser una imagen.',
+            'categoria_id.required' => 'La categoría es obligatoria.',
+            'categoria_id.exists' => 'La categoría seleccionada no es válida.',
+            'sub_categoria.required' => 'La subcategoría es obligatoria.',
+            'sub_categoria.string' => 'La subcategoría debe ser una cadena de texto.',
+            'sub_categoria.max' => 'La subcategoría no debe superar los 255 caracteres.',
+            'marca_id.required' => 'La marca es obligatoria.',
+            'marca_id.exists' => 'La marca seleccionada no es válida.',
         ]);
 
         if ($validator->fails()) {

@@ -1,0 +1,74 @@
+/* =========================
+   FUENTE BASE
+========================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+html, body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f9fafb; /* gray-50 */
+    color: #1f2937; /* gray-800 */
+}
+
+/* =========================
+   HEADER
+========================= */
+header h1 {
+    letter-spacing: -0.01em;
+}
+
+header p {
+    color: #6b7280; /* gray-500 */
+}
+
+/* =========================
+   SECCIONES
+========================= */
+section h2 {
+    letter-spacing: 0.08em;
+}
+
+/* =========================
+   TARJETAS / LINKS
+========================= */
+a.border {
+    background-color: #ffffff;
+    border-color: #e5e7eb; /* gray-200 */
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+a.border:hover {
+    background-color: #f3f4f6; /* gray-100 */
+    border-color: #d1d5db; /* gray-300 */
+}
+
+/* =========================
+   ICONOS
+========================= */
+a.border i {
+    display: block;
+    font-size: 1.4rem;
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: 0.5rem;
+    transition: color 0.15s ease;
+}
+
+a.border:hover i {
+    color: #4b5563; /* gray-600 */
+}
+
+/* =========================
+   TEXTO TARJETAS
+========================= */
+a.border p {
+    font-size: 0.95rem;
+    color: #1f2937; /* gray-800 */
+}
+
+/* =========================
+   GRID AJUSTES FINOS
+========================= */
+@media (min-width: 1024px) {
+    .max-w-6xl {
+        max-width: 72rem;
+    }
+}

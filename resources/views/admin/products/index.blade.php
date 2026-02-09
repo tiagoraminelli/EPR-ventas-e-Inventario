@@ -15,24 +15,10 @@
 
 <body class="bg-gray-100 font-sans">
 
-    <!-- MODAL CONFIRMACIÓN -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/50 hidden z-50">
-        <div class="relative top-20 mx-auto p-5 w-96 bg-white shadow">
-            <h3 class="text-lg font-semibold text-gray-900 text-center">¿Estás seguro?</h3>
-            <p class="text-sm text-gray-600 text-center mt-2">
-                ¿Seguro que deseas eliminar este producto?
-            </p>
+    <!-- ================= MODAL ELIMINAR ================= -->
+    <x-confirm-modal id="delete-product-modal" title="¿Estás seguro?"
+        message="¿Seguro que deseas eliminar este producto?" confirm-text="Eliminar" cancel-text="Cancelar" />
 
-            <div class="mt-4 space-y-2">
-                <button id="confirm-btn" class="w-full px-4 py-2 bg-gray-900 text-white hover:bg-black">
-                    Eliminar
-                </button>
-                <button id="cancel-btn" class="w-full px-4 py-2 bg-gray-200 text-gray-800 hover:bg-gray-300">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
 
     <div class="flex min-h-screen">
         <x-admin-nav />
@@ -65,6 +51,12 @@
 
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar producto"
                         class="flex-grow border border-gray-300 px-3 py-2">
+
+                    <!-- Productos eliminados -->
+                    <label class="flex items-center gap-1 text-gray-600">
+                        <input type="checkbox" name="with_trashed" {{ request('with_trashed') ? 'checked' : '' }}>
+                        Incluir eliminados
+                    </label>
 
                     <!-- CATEGORÍA -->
                     <select name="categoria" class="select2 w-56 border border-gray-300 px-3 py-2">
@@ -192,14 +184,20 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            <form action="{{ route('products.destroy', $product->id) }}" method="POST"
-                                                data-delete-form>
+                                            <form id="delete-form-{{ $product->id }}"
+                                                action="{{ route('products.destroy', $product->id) }}" method="POST"
+                                                class="hidden">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="delete-btn" title="Eliminar">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
                                             </form>
+                                            <button type="button"
+                                                onclick="openConfirmModal('delete-product-modal', () => {
+        document.getElementById('delete-form-{{ $product->id }}').submit();
+    })"
+                                                class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -274,14 +272,19 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
 
-                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST"
-                                            data-delete-form>
+                                        <form id="delete-form-{{ $product->id }}"
+                                            action="{{ route('products.destroy', $product->id) }}" method="POST"
+                                            class="hidden">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="button" class="delete-btn" title="Eliminar">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
                                         </form>
+                                        <button type="button"
+                                            onclick="openConfirmModal('delete-product-modal', () => {
+        document.getElementById('delete-form-{{ $product->id }}').submit();
+    })"
+                                            class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -335,26 +338,7 @@
     </script>
 
 
-    <!-- MODAL DELETE -->
-    <script>
-        let formToSubmit = null;
 
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                formToSubmit = btn.closest('form');
-                document.getElementById('confirm-modal').classList.remove('hidden');
-            });
-        });
-
-        document.getElementById('confirm-btn').addEventListener('click', () => {
-            if (formToSubmit) formToSubmit.submit();
-        });
-
-        document.getElementById('cancel-btn').addEventListener('click', () => {
-            document.getElementById('confirm-modal').classList.add('hidden');
-            formToSubmit = null;
-        });
-    </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 

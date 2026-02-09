@@ -4,113 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control</title>
+<link rel="stylesheet" href="{{ asset('css/panel.css') }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
         body {
             font-family: 'Inter', sans-serif;
         }
-        .dashboard-card {
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-900">
-    <!-- Contenedor principal -->
-    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-900 text-gray-200">
-        <header class="text-center mb-10 md:mb-16">
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">Panel de Control de Gestión de RDM</h1>
-            <p class="mt-4 text-sm sm:text-base text-gray-400 max-w-xl mx-auto">
-                Accede rápidamente a las secciones clave para gestionar productos, ventas, clientes y más.
-            </p>
-        </header>
 
-        <main class="w-full max-w-6xl mx-auto">
-            <!-- Sección de Vistas Generales -->
-            <div class="mb-12">
-                <h2 class="text-2xl font-semibold text-gray-100 mb-4">Vistas Generales</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Tarjeta de Productos -->
-                    <a href="{{ route('products.index') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-boxes text-3xl mb-3 text-blue-400"></i>
-                        <span class="font-medium text-lg text-white">Productos</span>
-                    </a>
-                    <!-- Tarjeta de Ventas -->
-                    <a href="{{ route('ventas.index') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-shopping-cart text-3xl mb-3 text-green-400"></i>
-                        <span class="font-medium text-lg text-white">Ventas</span>
-                    </a>
-                    <!-- Tarjeta de Clientes -->
-                    <a href="{{ route('clientes.index') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-user-friends text-3xl mb-3 text-yellow-400"></i>
-                        <span class="font-medium text-lg text-white">Clientes</span>
-                    </a>
-                    <!-- Tarjeta de Marcas -->
-                    <a href="{{ route('marcas.index') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-tags text-3xl mb-3 text-purple-400"></i>
-                        <span class="font-medium text-lg text-white">Marcas</span>
-                    </a>
-                    <!-- Tarjeta de Categorías -->
-                    <a href="{{ route('categorias.index') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-list-alt text-3xl mb-3 text-red-400"></i>
-                        <span class="font-medium text-lg text-white">Categorías</span>
-                    </a>
-                    <!-- Tarjeta de Gráficos -->
-                    <a href="{{ route('admin.graficos') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-chart-line text-3xl mb-3 text-indigo-400"></i>
-                        <span class="font-medium text-lg text-white">Gráficos</span>
-                    </a>
-                </div>
-            </div>
+<body class="bg-gray text-gray-800">
 
-            <!-- Sección de Acciones de Creación -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-100 mb-4">Crear Nuevo</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Tarjeta de Crear Producto -->
-                    <a href="{{ route('products.create') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-box text-3xl mb-3 text-blue-400"></i>
-                        <span class="font-medium text-lg text-white">Crear Producto</span>
-                    </a>
-                    <!-- Tarjeta de Crear Venta -->
-                    <a href="{{ route('ventas.create') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-cart-plus text-3xl mb-3 text-green-400"></i>
-                        <span class="font-medium text-lg text-white">Crear Venta</span>
-                    </a>
-                    <!-- Tarjeta de Crear Cliente -->
-                    <a href="{{ route('clientes.create') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-user-plus text-3xl mb-3 text-yellow-400"></i>
-                        <span class="font-medium text-lg text-white">Crear Cliente</span>
-                    </a>
-                    <!-- Tarjeta de Crear Marca -->
-                    <a href="{{ route('marcas.create') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-plus-circle text-3xl mb-3 text-purple-400"></i>
-                        <span class="font-medium text-lg text-white">Crear Marca</span>
-                    </a>
-                    <!-- Tarjeta de Crear Categoría -->
-                    <a href="{{ route('categorias.create') }}"
-                       class="dashboard-card flex flex-col items-center p-6 bg-slate-800 rounded-2xl shadow-xl hover:bg-slate-700">
-                        <i class="fas fa-folder-plus text-3xl mb-3 text-red-400"></i>
-                        <span class="font-medium text-lg text-white">Crear Categoría</span>
-                    </a>
-                </div>
+<div class="min-h-screen p-6">
+
+    <!-- Header -->
+    <header class="max-w-6xl mx-auto mb-12">
+        <h1 class="text-3xl font-semibold text-gray-900">
+            Panel de Control
+        </h1>
+        <p class="mt-2 text-sm text-gray-500">
+            Gestión general del sistema
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto space-y-12">
+
+        <!-- ================= VISTAS ================= -->
+        <section>
+            <h2 class="text-sm font-semibold text-gray-500 uppercase mb-4">
+                Vistas generales
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{{ route('products.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-boxes text-gray-400 mb-3"></i>
+                    <p class="font-medium">Productos</p>
+                </a>
+
+                <a href="{{ route('ventas.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-shopping-cart text-gray-400 mb-3"></i>
+                    <p class="font-medium">Ventas</p>
+                </a>
+
+                <a href="{{ route('clientes.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-user text-gray-400 mb-3"></i>
+                    <p class="font-medium">Clientes</p>
+                </a>
+
+                <a href="{{ route('marcas.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-tags text-gray-400 mb-3"></i>
+                    <p class="font-medium">Marcas</p>
+                </a>
+
+                <a href="{{ route('categorias.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-list text-gray-400 mb-3"></i>
+                    <p class="font-medium">Categorías</p>
+                </a>
+
+                <a href="{{ route('admin.graficos') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-chart-line text-gray-400 mb-3"></i>
+                    <p class="font-medium">Gráficos</p>
+                </a>
             </div>
-        </main>
-    </div>
+        </section>
+
+        <!-- ================= CREAR ================= -->
+        <section>
+            <h2 class="text-sm font-semibold text-gray-500 uppercase mb-4">
+                Crear nuevo
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{{ route('products.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-box text-gray-400 mb-3"></i>
+                    <p class="font-medium">Nuevo producto</p>
+                </a>
+
+                <a href="{{ route('ventas.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-cart-plus text-gray-400 mb-3"></i>
+                    <p class="font-medium">Nueva venta</p>
+                </a>
+
+                <a href="{{ route('clientes.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-user-plus text-gray-400 mb-3"></i>
+                    <p class="font-medium">Nuevo cliente</p>
+                </a>
+
+                <a href="{{ route('marcas.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-plus text-gray-400 mb-3"></i>
+                    <p class="font-medium">Nueva marca</p>
+                </a>
+
+                <a href="{{ route('categorias.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-folder-plus text-gray-400 mb-3"></i>
+                    <p class="font-medium">Nueva categoría</p>
+                </a>
+            </div>
+        </section>
+
+    </main>
+</div>
+
 </body>
 </html>
