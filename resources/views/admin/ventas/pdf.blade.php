@@ -104,7 +104,7 @@
         }
 
         th {
-            background-color: #3b82f6;
+            background-color: #aaaaaa;
             color: #fff;
             font-weight: 500;
             font-size: 11px;
@@ -146,7 +146,7 @@
             font-size: 15px;
             font-weight: 700;
             background-color: #e3f2fd;
-            color: #1e40af;
+            color: #333;
             padding: 4px 8px;
             border-radius: 4px;
         }
