@@ -214,10 +214,10 @@
                             <div class="border shadow-sm hover:shadow transition">
                                 <div class="h-40 bg-gray-100 overflow-hidden">
                                     @if ($product->url_imagen)
-                                        <img src="{{ asset('storage/' . $product->url_imagen) }}"
-                                            class="object-cover h-full w-full">
+                                        <x-image-preview :src="asset('storage/' . $product->url_imagen)" :alt="$product->nombre" />
                                     @endif
                                 </div>
+
                                 <div class="p-4 text-sm space-y-2">
                                     <h3 class="font-semibold truncate">{{ $product->nombre }}</h3>
                                     <p class="text-gray-500">{{ $product->marca->nombre ?? 'N/A' }}</p>
@@ -351,6 +351,18 @@
             });
         });
     </script>
+
+    <!-- IMAGE PREVIEW MODAL -->
+    <div id="image-preview-modal" class="fixed inset-0 bg-black/80 hidden z-[9999] flex items-center justify-center">
+
+        <img id="image-preview-img" src="" class="max-w-[90vw] max-h-[90vh] object-contain shadow-2xl">
+
+        <!-- cerrar -->
+        <button onclick="closeImagePreview()" class="absolute top-5 right-5 text-white text-3xl font-bold">
+            &times;
+        </button>
+    </div>
+
 
 </body>
 
