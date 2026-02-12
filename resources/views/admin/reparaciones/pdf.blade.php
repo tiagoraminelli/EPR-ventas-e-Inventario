@@ -1,333 +1,290 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Reparación #{{ $reparacion->id }}</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Reparación #{{ $reparacion->id }}</title>
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            font-size: 12px;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
+<style>
+    body {
+        font-family: DejaVu Sans, Arial, sans-serif;
+        font-size: 11px;
+        color: #000;
+        margin: 0;
+        padding: 25px;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 800px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 25px 30px;
-            border-radius: 10px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-        }
+    .container {
+        width: 100%;
+    }
 
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-        }
+    .header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
 
-        .header .empresa h2 {
-            margin: 0 0 5px 0;
-            font-size: 22px;
-            font-weight: 700;
-        }
+    .header-table {
+        width: 100%;
+    }
 
-        .header .empresa p {
-            margin: 2px 0;
-            font-size: 12px;
-        }
+    .header-left {
+        width: 60%;
+        vertical-align: top;
+    }
 
-        .header .reparacion {
-            text-align: right;
-        }
+    .header-right {
+        width: 40%;
+        text-align: right;
+        vertical-align: top;
+    }
 
-        .header .reparacion h3 {
-            margin: 0 0 8px 0;
-            font-size: 16px;
-            font-weight: 500;
-            color: #e53935;
-        }
+    .logo {
+        height: 55px;
+        margin-bottom: 8px;
+    }
 
-        .header .info-reparacion p {
-            margin: 2px 0;
-            font-size: 12px;
-            color: #555;
-        }
+    .titulo-documento {
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
 
-        /* Section Titles */
-        .section {
-            margin-bottom: 20px;
-        }
+    .codigo {
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
 
-        .section h3 {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            padding: 6px 12px;
-            background-color: #f0f0f0;
-            border-left: 4px solid #3b82f6;
-            border-radius: 4px;
-        }
+    .section-title {
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 3px;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
 
-        /* Info Cliente */
-        .cliente-info {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .cliente-info div {
-            width: 48%;
-            margin-bottom: 6px;
-        }
+    th {
+        border-bottom: 1px solid #000;
+        text-align: left;
+        padding: 6px 4px;
+        font-size: 10px;
+        text-transform: uppercase;
+    }
 
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
+    td {
+        padding: 6px 4px;
+        border-bottom: 1px solid #ccc;
+    }
 
-        th,
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
+    .text-right {
+        text-align: right;
+    }
 
-        th {
-            background-color: #3b82f6;
-            color: #fff;
-            font-weight: 500;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
+    .box {
+        border: 1px solid #000;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
 
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
+    .totales {
+        width: 45%;
+        margin-left: auto;
+        margin-top: 15px;
+    }
 
-        /* Totals */
-        .totales {
-            width: 60%;
-            margin-left: auto;
-            margin-right: right;
-            margin-top: 20px;
-        }
+    .totales td {
+        border: none;
+        padding: 4px;
+    }
 
-        .totales table {
-            width: 100%;
-            border: none;
-        }
+    .total-final {
+        border-top: 2px solid #000;
+        font-weight: bold;
+        font-size: 13px;
+    }
 
-        .totales th {
-            text-align: left;
-            font-weight: 500;
-            font-size: 12px;
-            background-color: transparent;
-            color: #555;
-        }
+    .footer {
+        margin-top: 30px;
+        border-top: 1px solid #000;
+        padding-top: 8px;
+        font-size: 9px;
+        text-align: center;
+    }
 
-        .totales td {
-            text-align: right;
-            font-weight: 500;
-            font-size: 12px;
-        }
-
-        .totales .total-pagar {
-            font-size: 15px;
-            font-weight: 700;
-            background-color: #e3f2fd;
-            color: #1e40af;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        /* Footer */
-        .agradecimiento {
-            text-align: center;
-            margin-top: 35px;
-            font-size: 11px;
-            color: #999;
-        }
-    </style>
+    .estado {
+        border: 1px solid #000;
+        padding: 3px 6px;
+        display: inline-block;
+        font-size: 10px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+</style>
 </head>
 
 <body>
-    <div class="container">
+<div class="container">
 
-        <!-- Encabezado -->
-        <div class="header">
+    <!-- HEADER -->
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td class="header-left">
+                    <img src="{{ public_path('utils/RDM-V2.jpg') }}" class="logo">
+                    <div>
+                        Alvear 585 – San Cristóbal – Santa Fe<br>
+                        Tel: 03408-15675519<br>
+                        info@rdm.com.ar
+                    </div>
+                </td>
 
-            <!-- Logo + Info de la empresa -->
-            <div>
-                <div style="margin-bottom:15px;">
-                    <img src="{{ public_path('utils/RDM-V2.jpg') }}" alt="Logo" style="height:60px; width:auto;">
-                </div>
-                <div class="empresa">
-                    <p>Alvear 585, San Cristobal, Santa Fe</p>
-                    <p>CUIT: {{ optional($reparacion->cliente)->cuit_dni ?? 'Sin dato' }}</p>
-                </div>
-            </div>
-
-            <!-- Info de la reparación -->
-            <div class="reparacion">
-                <h3 style="color:#1e40af;">DETALLE DE REPARACIÓN | Cod.Unico: {{ $reparacion->codigo_unico }} | {{ $reparacion->id }}</h3>
-                <div class="info-reparacion" style="padding:10px 12px; border-radius:6px; background-color:#f3f4f6;">
-                    <p><strong>Fecha Ingreso:</strong>
-                        {{ \Carbon\Carbon::parse($reparacion->fecha_ingreso)->format('d/m/Y') }}
-                        | <strong>Reparación n°:</strong> {{ $reparacion->id }}</p>
-                    <p><strong>Estado:</strong> {{ $reparacion->estado_reparacion }} | <strong>Reparable:</strong>
-                        {{ $reparacion->reparable ? 'Sí' : 'No' }}</p>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Datos del Cliente -->
-        <div class="section">
-            <h3>DATOS DEL CLIENTE</h3>
-            <div class="cliente-info" style="background-color:#f3f4f6; padding:10px 12px; border-radius:6px;">
-                <p><strong>Razón Social:</strong> {{ optional($reparacion->cliente)->RazonSocial ?? 'Sin dato' }} |
-                    <strong>CUIT/DNI:</strong> {{ optional($reparacion->cliente)->cuit_dni ?? 'Sin dato' }}
-                </p>
-                <p><strong>Localidad:</strong> {{ optional($reparacion->cliente)->Localidad ?? '' }} |
-                    <strong>Domicilio:</strong> {{ optional($reparacion->cliente)->Domicilio ?? '' }}
-                </p>
-                <p><strong>Teléfono:</strong> {{ optional($reparacion->cliente)->Telefono ?? '' }}</p>
-            </div>
-        </div>
-
-        <!-- Detalles de Reparación -->
-        <div class="section">
-            <h3>DETALLES DE LA REPARACIÓN</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Equipo</th>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ $reparacion->equipo_descripcion }}</td>
-                        <td>{{ $reparacion->equipo_marca ?? 'Sin dato' }}</td>
-                        <td>{{ $reparacion->equipo_modelo ?? 'Sin dato' }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Sección de Daños y Diagnóstico -->
-            <div style="margin-top: 15px; padding:10px 12px; background-color:#f3f4f6; border-radius:6px;">
-                <h4 style="margin-bottom:5px; color:#1e40af;">DAÑOS DETECTADOS</h4>
-                <p style="margin-bottom:10px;">{{ $reparacion->descripcion_danio ?? 'Sin descripción' }}</p>
-
-                <h4 style="margin-bottom:5px; color:#1e40af;">DIAGNÓSTICO DE LA REPARACIÓN</h4>
-                <p>{{ $reparacion->solucion_aplicada ?? 'Sin diagnóstico' }}</p>
-            </div>
-        </div>
-
-
-
-
-        <!-- Servicios Aplicados -->
-        <div class="section">
-            <h3>Servicios Aplicados</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Servicio</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unitario</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($reparacion->reparacionServicios as $rs)
-                        <tr>
-                            <td>{{ $rs->servicio->nombre ?? 'Sin Servicio' }}</td>
-                            <td>{{ $rs->cantidad }}</td>
-                            <td>${{ number_format($rs->precio, 2, ',', '.') }}</td>
-                            <td>${{ number_format($rs->cantidad * $rs->precio, 2, ',', '.') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4">No hay servicios asociados.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Productos Utilizados -->
-        <div class="section">
-            <h3>Productos Utilizados</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unitario</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($reparacion->reparacionProductos as $rp)
-                        <tr>
-                            <td>{{ $rp->producto->nombre ?? 'Sin Producto' }}</td>
-                            <td>{{ $rp->cantidad }}</td>
-                            <td>${{ number_format($rp->precio, 2, ',', '.') }}</td>
-                            <td>${{ number_format($rp->cantidad * $rp->precio, 2, ',', '.') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4">No hay productos asociados.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Totales -->
-        @php
-            $subtotalProductos = $reparacion->reparacionProductos->sum(fn($rp) => $rp->cantidad * $rp->precio);
-            $subtotalServicios = $reparacion->reparacionServicios->sum(fn($rs) => $rs->cantidad * $rs->precio);
-            $total = $subtotalProductos + $subtotalServicios;
-        @endphp
-        <div class="totales">
-            <table>
-                <tr>
-                    <th>Subtotal Productos</th>
-                    <td>${{ number_format($subtotalProductos, 2, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Subtotal Servicios</th>
-                    <td>${{ number_format($subtotalServicios, 2, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th class="total-pagar">Total a Pagar</th>
-                    <td class="total-pagar">${{ number_format($total, 2, ',', '.') }}</td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- Footer -->
-        <div class="agradecimiento">
-            <p>Los precios, la disponibilidad y los servicios ofrecidos son sujetos a cambios sin previo aviso.</p>
-            <p>Gracias por confiar en nosotros.</p>
-            <p>Teléfono: [03408-15675519] | Email: [info@rdm.com]</p>
-        </div>
-
+                <td class="header-right">
+                    <div class="titulo-documento">
+                        ORDEN DE REPARACIÓN
+                    </div>
+                    <div class="codigo">
+                        N° {{ $reparacion->codigo_unico }}
+                    </div>
+                    <br>
+                    <strong>Ingreso:</strong> {{ \Carbon\Carbon::parse($reparacion->fecha_ingreso)->format('d/m/Y') }}<br>
+                    @if($reparacion->fecha_egreso)
+                        <strong>Egreso:</strong> {{ \Carbon\Carbon::parse($reparacion->fecha_egreso)->format('d/m/Y') }}<br>
+                    @endif
+                    <div class="estado">
+                        {{ $reparacion->estado_reparacion }}
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
-</body>
 
+    <!-- CLIENTE -->
+    <div class="section-title">Datos del Cliente</div>
+    <div class="box">
+        <strong>Razón Social:</strong> {{ optional($reparacion->cliente)->RazonSocial ?? '-' }}<br>
+        <strong>CUIT/DNI:</strong> {{ optional($reparacion->cliente)->cuit_dni ?? '-' }}<br>
+        <strong>Domicilio:</strong>
+        {{ optional($reparacion->cliente)->Domicilio ?? '-' }}
+        - {{ optional($reparacion->cliente)->Localidad ?? '' }}<br>
+        <strong>Teléfono:</strong> {{ optional($reparacion->cliente)->Telefono ?? '-' }}<br>
+        <strong>Email:</strong> {{ optional($reparacion->cliente)->Email ?? '-' }}
+    </div>
+
+    <!-- EQUIPO -->
+    <div class="section-title">Equipo</div>
+    <div class="box">
+        <strong>Descripción:</strong> {{ $reparacion->equipo_descripcion }}<br>
+        <strong>Marca:</strong> {{ $reparacion->equipo_marca ?? '-' }}<br>
+        <strong>Modelo:</strong> {{ $reparacion->equipo_modelo ?? '-' }}
+    </div>
+
+    <!-- DAÑO -->
+    <div class="section-title">Daños Detectados</div>
+    <div class="box">
+        {{ $reparacion->descripcion_danio ?? '-' }}
+    </div>
+
+    @if($reparacion->solucion_aplicada)
+    <div class="section-title">Solución Aplicada</div>
+    <div class="box">
+        {{ $reparacion->solucion_aplicada }}
+    </div>
+    @endif
+
+    <!-- SERVICIOS -->
+    @php
+        $subtotalServicios = $reparacion->reparacionServicios->sum(fn($rs) => $rs->cantidad * $rs->precio);
+        $subtotalProductos = $reparacion->reparacionProductos->sum(fn($rp) => $rp->cantidad * $rp->precio);
+        $total = $subtotalServicios + $subtotalProductos;
+    @endphp
+
+    @if($reparacion->reparacionServicios->count() > 0)
+    <div class="section-title">Servicios</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th style="width:10%">Cant.</th>
+                <th style="width:20%" class="text-right">Precio</th>
+                <th style="width:20%" class="text-right">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach ($reparacion->reparacionServicios as $rs)
+            <tr>
+                <td>{{ $rs->servicio->nombre ?? '-' }}</td>
+                <td>{{ $rs->cantidad }}</td>
+                <td class="text-right">$ {{ number_format($rs->precio,2,',','.') }}</td>
+                <td class="text-right">$ {{ number_format($rs->cantidad * $rs->precio,2,',','.') }}</td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    <!-- PRODUCTOS -->
+    @if($reparacion->reparacionProductos->count() > 0)
+    <div class="section-title">Productos Utilizados</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th style="width:10%">Cant.</th>
+                <th style="width:20%" class="text-right">Precio</th>
+                <th style="width:20%" class="text-right">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach ($reparacion->reparacionProductos as $rp)
+            <tr>
+                <td>{{ $rp->producto->nombre ?? '-' }}</td>
+                <td>{{ $rp->cantidad }}</td>
+                <td class="text-right">$ {{ number_format($rp->precio,2,',','.') }}</td>
+                <td class="text-right">$ {{ number_format($rp->cantidad * $rp->precio,2,',','.') }}</td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    <!-- TOTALES -->
+    @if($total > 0)
+    <table class="totales">
+        @if($subtotalProductos > 0)
+        <tr>
+            <td>Subtotal Productos</td>
+            <td class="text-right">$ {{ number_format($subtotalProductos,2,',','.') }}</td>
+        </tr>
+        @endif
+
+        @if($subtotalServicios > 0)
+        <tr>
+            <td>Subtotal Servicios</td>
+            <td class="text-right">$ {{ number_format($subtotalServicios,2,',','.') }}</td>
+        </tr>
+        @endif
+
+        <tr class="total-final">
+            <td>Total</td>
+            <td class="text-right">$ {{ number_format($total,2,',','.') }}</td>
+        </tr>
+    </table>
+    @endif
+
+    <!-- FOOTER -->
+    <div class="footer">
+        Documento generado el {{ now()->format('d/m/Y H:i') }}<br>
+        RDM - Reparaciones y Servicios Técnicos
+    </div>
+
+</div>
+</body>
 </html>

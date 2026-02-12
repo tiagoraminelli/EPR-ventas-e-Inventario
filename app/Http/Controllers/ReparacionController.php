@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 use PDF;
@@ -237,7 +239,7 @@ class ReparacionController extends Controller
 
         // Productos (opcional)
         'productos' => 'nullable|array',
-        'productos.*.detalle_id' => 'nullable|exists:reparacion_productos,id',
+        'productos.*.detalle_id' => 'nullable|exists:reparacion_producto,id',
         'productos.*.id' => 'required_with:productos|exists:productos,id',
         'productos.*.cantidad' => 'required_with:productos|integer|min:1',
         'productos.*.precio_unitario' => 'required_with:productos|numeric|min:0',
@@ -282,15 +284,14 @@ class ReparacionController extends Controller
             $montoDescuento = ($subtotalSinDescuento * $descuentoPorcentaje) / 100;
             $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
+
             $costoTotal += $subtotalConDescuento;
 
             $detalleData = [
                 'reparacion_id' => $reparacion->id,
                 'producto_id' => $item['id'],
                 'cantidad' => $item['cantidad'],
-                'precio' => $item['precio_unitario'],
-                'descuento' => $montoDescuento,
-                'subtotal' => $subtotalConDescuento,
+                'precio' => $subtotalConDescuento
             ];
 
             if (!empty($item['detalle_id'])) {
@@ -417,17 +418,40 @@ class ReparacionController extends Controller
     /**
      * Exporta una reparación a PDF
      */
-    public function exportPdf($id)
-    {
-        $reparacion = Reparacion::with([
-            'cliente',
-            'reparacionProductos.producto',
-            'reparacionServicios.servicio'
-        ])->findOrFail($id);
+ public function exportPdf($id)
+{
+    $reparacion = Reparacion::with([
+        'cliente',
+        'reparacionProductos.producto',
+        'reparacionServicios.servicio'
+    ])->findOrFail($id);
 
-        $pdf = PDF::loadView('admin.reparaciones.pdf', compact('reparacion'))
-            ->setPaper('a4', 'portrait');
+    $pdf = PDF::loadView('admin.reparaciones.pdf', compact('reparacion'))
+        ->setPaper('a4', 'portrait');
 
-        return $pdf->stream("reparacion_{$reparacion->id}.pdf");
-    }
+    // ==============================
+    // Generación del nombre archivo
+    // ==============================
+
+    $cliente = $reparacion->cliente;
+
+    // Razón Social o Nombre Completo
+    $nombreCliente = $cliente->RazonSocial
+        ?? $cliente->NombreCompleto
+        ?? 'SinCliente';
+
+    // Fecha creación formateada
+    $fecha = Carbon::parse($reparacion->created_at)->format('Y-m-d');
+
+    // Estado sin espacios
+    $estado = Str::slug($reparacion->estado_reparacion, '-');
+
+    // Construcción base
+    $fileName = "{$reparacion->codigo_unico} - {$nombreCliente} - {$reparacion->id} - {$fecha} - {$estado}";
+
+    // Limpiar caracteres no permitidos
+    $fileName = Str::slug($fileName, '_');
+
+    return $pdf->stream($fileName . '.pdf');
+}
 }
