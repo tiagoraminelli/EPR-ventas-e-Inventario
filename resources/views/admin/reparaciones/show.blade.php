@@ -46,6 +46,7 @@
                                     | Reparación n°: <span
                                         class="text-gray-900 font-bold text-base">{{ $reparacion->id }}</span>
                                 </p>
+                                <p class="text-gray-900 font-bold text-base">| Cod: <span class="text-gray-900 font-bold text-base">{{ $reparacion->codigo_unico }}</span></p>
                                 <p class="text-gray-700 text-sm font-semibold mb-1">
                                     Estado: <span
                                         class="text-gray-900 font-bold text-base">{{ $reparacion->estado_reparacion }}</span>

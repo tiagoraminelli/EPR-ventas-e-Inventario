@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Reparacion;
 use App\Models\Cliente;
+use App\Models\Product as Producto;
+use App\Models\Servicio;
+use App\Models\ReparacionProducto;
+use App\Models\ReparacionServicio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use PDF; // Asegúrate de tener esta línea para usar la librería de PDF
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
+
+use PDF;
 
 class ReparacionController extends Controller
 {
@@ -18,11 +26,6 @@ class ReparacionController extends Controller
         if ($request->filled('estado_reparacion')) {
             $query->where('estado_reparacion', $request->estado_reparacion);
         }
-
-        // // Cliente
-        // if ($request->filled('cliente_id')) {
-        //     $query->where('cliente_id', $request->cliente_id);
-        // }
 
         // Reparable
         if ($request->filled('reparable')) {
@@ -45,7 +48,6 @@ class ReparacionController extends Controller
             });
         }
 
-        // 👇 ACÁ ESTABA EL PROBLEMA
         $reparaciones = $query
             ->orderBy('fecha_ingreso', 'desc')
             ->paginate(10)
@@ -56,20 +58,26 @@ class ReparacionController extends Controller
         return view('admin.reparaciones.index', compact('reparaciones', 'clientes'));
     }
 
-
-
-    // Método para mostrar el formulario de creación
+    /**
+     * Muestra el formulario de creación con productos y servicios disponibles
+     */
     public function create()
     {
-        $clientes = Cliente::all(); // Para el select de clientes
-        return view('admin.reparaciones.create', compact('clientes'));
+        $clientes = Cliente::all()->sortBy('NombreCompleto', SORT_NATURAL | SORT_FLAG_CASE);
+        $productos = Producto::all()->sortBy('nombre', SORT_NATURAL | SORT_FLAG_CASE);
+        $servicios = Servicio::all()->sortBy('nombre', SORT_NATURAL | SORT_FLAG_CASE);
+
+        return view('admin.reparaciones.create', compact('clientes', 'productos', 'servicios'));
     }
 
-    // Método para guardar una nueva reparación
+    /**
+     * Guarda una nueva reparación con sus productos y servicios
+     */
     public function store(Request $request)
     {
-        // Reglas de validación
+        // Validación completa incluyendo productos y servicios
         $validator = Validator::make($request->all(), [
+            // Campos de reparación
             'codigo_unico' => 'nullable|string|max:50|unique:reparaciones,codigo_unico',
             'cliente_id' => 'required|exists:clientes,id',
             'equipo_descripcion' => 'required|string|min:3',
@@ -80,113 +88,346 @@ class ReparacionController extends Controller
             'reparable' => 'required|boolean',
             'estado_reparacion' => 'required|string|in:Pendiente,En proceso,Reparado,No reparable,Entregado',
             'fecha_ingreso' => 'required|date',
+            'fecha_egreso' => 'nullable|date|after_or_equal:fecha_ingreso',
+            'costo_total' => 'nullable|numeric|min:0',
+
+            // Productos (opcional)
+            'productos' => 'nullable|array',
+            'productos.*.id' => 'required_with:productos|exists:productos,id',
+            'productos.*.cantidad' => 'required_with:productos|integer|min:1',
+            'productos.*.precio_unitario' => 'required_with:productos|numeric|min:0',
+            'productos.*.descuento' => 'nullable|numeric|min:0|max:100',
+
+            // Servicios (opcional)
+            'servicios' => 'nullable|array',
+            'servicios.*.servicio_id' => 'required_with:servicios|exists:servicios,id',
+            'servicios.*.cantidad' => 'required_with:servicios|integer|min:1',
+            'servicios.*.precio' => 'required_with:servicios|numeric|min:0',
         ]);
 
-        // Si la validación falla, redirige de vuelta con errores y valores antiguos
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Datos validados
-        $data = $validator->validated();
+        try {
+            // Obtener los datos validados ANTES de la transacción
+            $validatedData = $validator->validated();
 
-        // ⚡ Procesamiento adicional si se necesitara
-        // Por ejemplo, generar un código dinámico si no viene
-        if (empty($data['codigo_unico'])) {
-            $data['codigo_unico'] = 'REP-' . now()->format('YmdHis');
+            DB::beginTransaction();
+
+            // Generar código único si no viene
+            if (empty($validatedData['codigo_unico'])) {
+                $validatedData['codigo_unico'] = 'REP-' . now()->format('YmdHis');
+            }
+
+            // Establecer costo_total inicial
+            $validatedData['costo_total'] = 0;
+
+            // Crear la reparación
+            $reparacion = Reparacion::create($validatedData);
+
+            $costoTotal = 0;
+
+            // ===== PROCESAR PRODUCTOS =====
+            $requestProductos = $request->productos ?? [];
+
+            foreach ($requestProductos as $item) {
+                $subtotalSinDescuento = $item['cantidad'] * $item['precio_unitario'];
+                $descuentoPorcentaje = $item['descuento'] ?? 0;
+                $montoDescuento = ($subtotalSinDescuento * $descuentoPorcentaje) / 100;
+                $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
+
+                $costoTotal += $subtotalConDescuento;
+
+                // Crear detalle de producto
+                ReparacionProducto::create([
+                    'reparacion_id' => $reparacion->id,
+                    'producto_id' => $item['id'],
+                    'cantidad' => $item['cantidad'],
+                    'precio' => $item['precio_unitario'],
+                    'descuento' => $montoDescuento,
+                    'subtotal' => $subtotalConDescuento,
+                ]);
+
+                // Actualizar stock del producto
+                $producto = Producto::find($item['id']);
+                if ($producto) {
+                    $producto->stock -= $item['cantidad'];
+                    $producto->save();
+                }
+            }
+
+            // ===== PROCESAR SERVICIOS =====
+            $requestServicios = $request->servicios ?? [];
+
+            foreach ($requestServicios as $item) {
+                $subtotalServicio = $item['cantidad'] * $item['precio'];
+                $costoTotal += $subtotalServicio;
+
+                // Crear detalle de servicio
+                ReparacionServicio::create([
+                    'reparacion_id' => $reparacion->id,
+                    'servicio_id' => $item['servicio_id'],
+                    'cantidad' => $item['cantidad'],
+                    'precio' => $item['precio'],
+                    'subtotal' => $subtotalServicio,
+                ]);
+            }
+
+            // Actualizar costo total de la reparación
+            $reparacion->update(['costo_total' => $costoTotal]);
+
+            DB::commit();
+
+            return redirect()->route('reparaciones.index')
+                ->with('success', 'Reparación creada correctamente con productos y servicios.');
+
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al crear reparación: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withErrors(['error' => 'Error al crear la reparación: ' . $e->getMessage()])
+                ->withInput();
         }
-
-        // Crear la reparación
-        $reparacion = Reparacion::create($data);
-
-        return redirect()->route('reparaciones.index')
-            ->with('success', 'Reparación creada correctamente.');
     }
 
+    /**
+     * Muestra el formulario de edición con productos y servicios
+     */
     public function edit(Reparacion $reparacion)
     {
-        // Obtener clientes para el select
-        $clientes = Cliente::all();
+        // Cargar relaciones necesarias
+        $reparacion->load(['cliente', 'reparacionProductos.producto', 'reparacionServicios.servicio']);
 
-        // Retornar la vista con la reparación y los clientes
-        return view('admin.reparaciones.edit', compact('reparacion', 'clientes'));
+        $clientes = Cliente::all()->sortBy('NombreCompleto', SORT_NATURAL | SORT_FLAG_CASE);
+        $productos = Producto::all()->sortBy('nombre', SORT_NATURAL | SORT_FLAG_CASE);
+        $servicios = Servicio::all()->sortBy('nombre', SORT_NATURAL | SORT_FLAG_CASE);
+
+        return view('admin.reparaciones.edit', compact('reparacion', 'clientes', 'productos', 'servicios'));
     }
 
+    /**
+     * Actualiza una reparación con sus productos y servicios
+     */
+ public function update(Request $request, $id)
+{
+    $reparacion = Reparacion::findOrFail($id);
 
+    // Validación completa incluyendo productos y servicios
+    $validator = Validator::make($request->all(), [
+        // Campos de reparación
+        'codigo_unico' => 'required|string|max:255|unique:reparaciones,codigo_unico,' . $reparacion->id,
+        'cliente_id' => 'required|exists:clientes,id',
+        'equipo_descripcion' => 'required|string|max:255',
+        'equipo_marca' => 'required|string|max:255',
+        'equipo_modelo' => 'required|string|max:255',
+        'descripcion_danio' => 'required|string|min:5',
+        'solucion_aplicada' => 'nullable|string|min:5',
+        'reparable' => 'required|boolean',
+        'estado_reparacion' => 'required|string|max:50',
+        'fecha_ingreso' => 'required|date',
+        'fecha_egreso' => 'nullable|date|after_or_equal:fecha_ingreso',
+        'costo_total' => 'nullable|numeric|min:0',
 
-    public function update(Request $request, $id)
-    {
-        // Busca la reparación a actualizar
-        $reparacion = Reparacion::findOrFail($id);
+        // Productos (opcional)
+        'productos' => 'nullable|array',
+        'productos.*.detalle_id' => 'nullable|exists:reparacion_productos,id',
+        'productos.*.id' => 'required_with:productos|exists:productos,id',
+        'productos.*.cantidad' => 'required_with:productos|integer|min:1',
+        'productos.*.precio_unitario' => 'required_with:productos|numeric|min:0',
+        'productos.*.descuento' => 'nullable|numeric|min:0|max:100',
 
-        // Reglas de validación, ignorando el ID de la reparación actual para el código único
-        $validator = Validator::make($request->all(), [
-            'codigo_unico' => 'required|string|max:255|unique:reparaciones,codigo_unico,' . $reparacion->id,
-            'cliente_id' => 'required|exists:clientes,id',
-            'equipo_descripcion' => 'required|string|max:255',
-            'equipo_marca' => 'required|string|max:255',
-            'equipo_modelo' => 'required|string|max:255',
-            'descripcion_danio' => 'required|string|min:5',
-            'solucion_aplicada' => 'nullable|string|min:5',
-            'reparable' => 'required|boolean',
-            'estado_reparacion' => 'required|string|max:50',
-            'fecha_ingreso' => 'required|date',
-        ]);
+        // Servicios (opcional) - CORREGIDO: 'reparacion_servicio' en singular
+        'servicios' => 'nullable|array',
+        'servicios.*.detalle_id' => 'nullable|exists:reparacion_servicio,id', // ✅ Cambiado de 'reparacion_servicios' a 'reparacion_servicio'
+        'servicios.*.servicio_id' => 'required_with:servicios|exists:servicios,id',
+        'servicios.*.cantidad' => 'required_with:servicios|integer|min:1',
+        'servicios.*.precio' => 'required_with:servicios|numeric|min:0',
+    ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    try {
+        // Obtener los datos validados ANTES de la transacción
+        $validatedData = $validator->validated();
+
+        DB::beginTransaction();
+
+        // Obtener IDs existentes antes de procesar
+        $existingProductoDetalleIds = ReparacionProducto::where('reparacion_id', $reparacion->id)
+            ->pluck('id')
+            ->toArray();
+        $existingServicioDetalleIds = ReparacionServicio::where('reparacion_id', $reparacion->id) // ✅ Esto ya usa el modelo correcto
+            ->pluck('id')
+            ->toArray();
+
+        $costoTotal = 0;
+        $productosProcesados = [];
+        $serviciosProcesados = [];
+
+        // ===== PROCESAR PRODUCTOS =====
+        $requestProductos = $request->productos ?? [];
+
+        foreach ($requestProductos as $item) {
+            $subtotalSinDescuento = $item['cantidad'] * $item['precio_unitario'];
+            $descuentoPorcentaje = $item['descuento'] ?? 0;
+            $montoDescuento = ($subtotalSinDescuento * $descuentoPorcentaje) / 100;
+            $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
+
+            $costoTotal += $subtotalConDescuento;
+
+            $detalleData = [
+                'reparacion_id' => $reparacion->id,
+                'producto_id' => $item['id'],
+                'cantidad' => $item['cantidad'],
+                'precio' => $item['precio_unitario'],
+                'descuento' => $montoDescuento,
+                'subtotal' => $subtotalConDescuento,
+            ];
+
+            if (!empty($item['detalle_id'])) {
+                // Actualizar producto existente
+                ReparacionProducto::where('id', $item['detalle_id'])->update($detalleData);
+                $productosProcesados[] = (int) $item['detalle_id'];
+            } else {
+                // Crear nuevo producto
+                $nuevoDetalle = ReparacionProducto::create($detalleData);
+                $productosProcesados[] = $nuevoDetalle->id;
+            }
         }
 
-        // Actualiza la reparación con los datos validados
-        $reparacion->update($validator->validated());
+        // Eliminar productos no presentes
+        $productosAEliminar = array_diff($existingProductoDetalleIds, $productosProcesados);
+        if (!empty($productosAEliminar)) {
+            ReparacionProducto::whereIn('id', $productosAEliminar)->delete();
+        }
 
-        // Redirige al index con mensaje de éxito
-        return redirect()->route('reparaciones.index')->with('success', 'Reparación actualizada exitosamente.');
+        // ===== PROCESAR SERVICIOS =====
+        $requestServicios = $request->servicios ?? [];
+
+        foreach ($requestServicios as $item) {
+            $subtotalServicio = $item['cantidad'] * $item['precio'];
+            $costoTotal += $subtotalServicio;
+
+            $servicioData = [
+                'reparacion_id' => $reparacion->id,
+                'servicio_id' => $item['servicio_id'],
+                'cantidad' => $item['cantidad'],
+                'precio' => $item['precio']
+            ];
+
+            if (!empty($item['detalle_id'])) {
+                // Actualizar servicio existente
+                ReparacionServicio::where('id', $item['detalle_id'])->update($servicioData);
+                $serviciosProcesados[] = (int) $item['detalle_id'];
+            } else {
+                // Crear nuevo servicio
+                $nuevoServicio = ReparacionServicio::create($servicioData);
+                $serviciosProcesados[] = $nuevoServicio->id;
+            }
+        }
+
+        // Eliminar servicios no presentes
+        $serviciosAEliminar = array_diff($existingServicioDetalleIds, $serviciosProcesados);
+        if (!empty($serviciosAEliminar)) {
+            ReparacionServicio::whereIn('id', $serviciosAEliminar)->delete();
+        }
+
+        // Actualizar datos de la reparación
+        $validatedData['costo_total'] = $costoTotal;
+        $reparacion->update($validatedData);
+
+        DB::commit();
+
+        return redirect()->route('reparaciones.index')
+            ->with('success', 'Reparación actualizada exitosamente con productos y servicios.');
+
+    } catch (ValidationException $e) {
+        DB::rollBack();
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al actualizar reparación: ' . $e->getMessage(), [
+            'exception' => $e,
+            'trace' => $e->getTraceAsString()
+        ]);
+        return redirect()->back()
+            ->withErrors(['error' => 'Error al actualizar la reparación: ' . $e->getMessage()])
+            ->withInput();
     }
+}
 
+    /**
+     * Muestra los detalles de una reparación
+     */
     public function show(Reparacion $reparacion)
     {
-
-        // Retornar la vista con la reparación
+        $reparacion->load(['cliente', 'reparacionProductos.producto', 'reparacionServicios.servicio']);
         return view('admin.reparaciones.show', compact('reparacion'));
     }
 
-
-
     /**
-     * Elimina una reparación.
-     *
-     * Busca la reparación por su ID y la elimina. Si no existe, redirige al index con un mensaje de error.
-     *
-     * @param int $id El ID de la reparación a eliminar.
-     * @return \Illuminate\Http\RedirectResponse
+     * Elimina una reparación y sus detalles asociados
      */
     public function destroy($id)
     {
-        // Buscar la reparación
-        $reparacion = Reparacion::find($id);
+        try {
+            DB::beginTransaction();
 
-        if (!$reparacion) {
+            $reparacion = Reparacion::findOrFail($id);
+
+            // Restaurar stock de productos
+            foreach ($reparacion->reparacionProductos as $detalle) {
+                $producto = Producto::find($detalle->producto_id);
+                if ($producto) {
+                    $producto->stock += $detalle->cantidad;
+                    $producto->save();
+                }
+            }
+
+            // Eliminar detalles y la reparación
+            $reparacion->reparacionProductos()->delete();
+            $reparacion->reparacionServicios()->delete();
+            $reparacion->delete();
+
+            DB::commit();
+
             return redirect()->route('reparaciones.index')
-                ->with('error', 'La reparación no existe.');
+                ->with('success', 'Reparación eliminada correctamente.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al eliminar reparación: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('reparaciones.index')
+                ->with('error', 'Error al eliminar la reparación: ' . $e->getMessage());
         }
-
-        // Eliminar la reparación (soft delete si usas SoftDeletes)
-        $reparacion->delete();
-
-        return redirect()->route('reparaciones.index')
-            ->with('success', 'Reparación eliminada correctamente.');
     }
 
-
-
+    /**
+     * Exporta una reparación a PDF
+     */
     public function exportPdf($id)
     {
-        $reparacion = Reparacion::with(['cliente', 'reparacionServicios.servicio', 'reparacionProductos.producto'])->findOrFail($id);
+        $reparacion = Reparacion::with([
+            'cliente',
+            'reparacionProductos.producto',
+            'reparacionServicios.servicio'
+        ])->findOrFail($id);
 
-        $pdf = Pdf::loadView('admin.reparaciones.pdf', compact('reparacion'))
-            ->setPaper('a4', 'portrait'); // tamaño A4 vertical
+        $pdf = PDF::loadView('admin.reparaciones.pdf', compact('reparacion'))
+            ->setPaper('a4', 'portrait');
 
-        return $pdf->stream("reparacion_{$reparacion->id}.pdf"); // también podés usar ->download()
+        return $pdf->stream("reparacion_{$reparacion->id}.pdf");
     }
 }
