@@ -14,27 +14,27 @@ class ReparacionController extends Controller
     {
         $query = Reparacion::with('cliente');
 
-        // FILTRO: Estado de reparación
+        // Estado
         if ($request->filled('estado_reparacion')) {
             $query->where('estado_reparacion', $request->estado_reparacion);
         }
 
-        // FILTRO: Cliente
-        if ($request->filled('cliente_id')) {
-            $query->where('cliente_id', $request->cliente_id);
-        }
+        // // Cliente
+        // if ($request->filled('cliente_id')) {
+        //     $query->where('cliente_id', $request->cliente_id);
+        // }
 
-        // FILTRO: Reparable
+        // Reparable
         if ($request->filled('reparable')) {
             $query->where('reparable', $request->reparable);
         }
 
-        // FILTRO: Fecha de ingreso
+        // Fecha
         if ($request->filled('fecha_ingreso')) {
             $query->whereDate('fecha_ingreso', $request->fecha_ingreso);
         }
 
-        // FILTRO: Búsqueda general (código, equipo, descripción)
+        // Búsqueda general
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -45,14 +45,18 @@ class ReparacionController extends Controller
             });
         }
 
-        // Obtener resultados ordenados por fecha de ingreso
-        $reparaciones = $query->orderBy('fecha_ingreso', 'desc')->get();
+        // 👇 ACÁ ESTABA EL PROBLEMA
+        $reparaciones = $query
+            ->orderBy('fecha_ingreso', 'desc')
+            ->paginate(10)
+            ->appends($request->query());
 
-        // Clientes para el select
-        $clientes = Cliente::all();
+        $clientes = Cliente::orderBy('NombreCompleto')->get();
 
         return view('admin.reparaciones.index', compact('reparaciones', 'clientes'));
     }
+
+
 
     // Método para mostrar el formulario de creación
     public function create()
