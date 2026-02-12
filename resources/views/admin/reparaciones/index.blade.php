@@ -107,7 +107,9 @@
 
                         <tbody class="divide-y">
                             @foreach ($reparaciones as $reparacion)
-                                <tr class="hover:bg-gray-50">
+                                <tr class="hover:bg-gray-50 cursor-pointer"
+                                    onclick="window.open('{{ route('reparaciones.show', $reparacion->id) }}', '_blank')">
+
                                     <td class="px-4 py-2 font-medium">
                                         {{ $reparacion->codigo_unico }}
                                     </td>
@@ -130,15 +132,14 @@
 
                                     <td class="px-4 py-2 text-center">
                                         <div class="flex justify-center gap-3 text-gray-600">
-                                            <a href="{{ route('reparaciones.show', $reparacion->id) }}"
-                                                class="text-green-600" title="Ver">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
 
-                                            <a href="{{ route('reparaciones.edit', $reparacion->id) }}" title="Editar">
+                                            <!-- EDITAR -->
+                                            <a href="{{ route('reparaciones.edit', $reparacion->id) }}"
+                                                onclick="event.stopPropagation()" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
+                                            <!-- FORM DELETE -->
                                             <form id="delete-form-{{ $reparacion->id }}"
                                                 action="{{ route('reparaciones.destroy', $reparacion->id) }}"
                                                 method="POST" class="hidden">
@@ -146,17 +147,20 @@
                                                 @method('DELETE')
                                             </form>
 
+                                            <!-- ELIMINAR -->
                                             <button type="button"
-                                                onclick="openConfirmModal('delete-reparacion-modal', () => {
-                                                    document.getElementById('delete-form-{{ $reparacion->id }}').submit();
-                                                })"
+                                                onclick="event.stopPropagation(); openConfirmModal('delete-reparacion-modal', () => {
+                    document.getElementById('delete-form-{{ $reparacion->id }}').submit();
+                })"
                                                 class="text-red-600 hover:text-red-800" title="Eliminar">
                                                 <i class="fas fa-trash"></i>
                                             </button>
+
                                         </div>
                                     </td>
                                 </tr>
                             @endforeach
+
                         </tbody>
                     </table>
                 </div>
@@ -166,7 +170,9 @@
                     <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
                         @foreach ($reparaciones as $reparacion)
-                            <div class="border shadow-sm hover:shadow transition bg-white">
+                            <div class="border shadow-sm hover:shadow transition bg-white cursor-pointer"
+                                onclick="window.open('{{ route('reparaciones.show', $reparacion->id) }}', '_blank')">
+
                                 <div class="h-32 bg-gray-100 flex items-center justify-center">
                                     <i class="fas fa-tools text-4xl text-gray-400"></i>
                                 </div>
@@ -194,22 +200,30 @@
                                     </p>
 
                                     <div class="flex gap-4 mt-3 text-gray-600">
-                                        <a href="{{ route('reparaciones.show', $reparacion->id) }}"
-                                            class="text-green-600" title="Ver">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
 
-                                        <a href="{{ route('reparaciones.edit', $reparacion->id) }}" title="Editar">
+                                        <!-- EDITAR -->
+                                        <a href="{{ route('reparaciones.edit', $reparacion->id) }}"
+                                            onclick="event.stopPropagation()" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
 
+                                        <!-- FORM DELETE -->
+                                        <form id="delete-form-{{ $reparacion->id }}"
+                                            action="{{ route('reparaciones.destroy', $reparacion->id) }}"
+                                            method="POST" class="hidden">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+
+                                        <!-- ELIMINAR -->
                                         <button type="button"
-                                            onclick="openConfirmModal('delete-reparacion-modal', () => {
-                                                document.getElementById('delete-form-{{ $reparacion->id }}').submit();
-                                            })"
+                                            onclick="event.stopPropagation(); openConfirmModal('delete-reparacion-modal', () => {
+                    document.getElementById('delete-form-{{ $reparacion->id }}').submit();
+                })"
                                             class="text-red-600 hover:text-red-800" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </button>
+
                                     </div>
                                 </div>
                             </div>

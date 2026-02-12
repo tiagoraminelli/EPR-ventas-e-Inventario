@@ -13,186 +13,219 @@
     </style>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-200">
 
     <div class="flex min-h-screen">
-        <x-admin-nav />
 
-        <main class="flex-1 p-6 sm:p-10">
+        <!-- SIDEBAR -->
+        <div class="no-print">
+            <x-admin-nav />
+        </div>
 
-            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-                <div class="p-8 sm:p-12">
+        <!-- CONTENIDO -->
+        <main class="flex-1 flex justify-center py-10">
 
-                    <!-- Encabezado: Información de Cliente y Reparación -->
-                    <div class="flex flex-col sm:flex-row justify-between items-start mb-10">
-                        <div class="flex items-center mb-6 sm:mb-0">
-                            <img src="{{ asset('utils/RDM.jpg') }}" alt="Logo"
-                                class="h-16 w-16 rounded-full mr-4 shadow-md">
-                            <div>
-                                <h1 class="text-3xl font-bold text-gray-800">RDM</h1>
-                                <p class="text-gray-500 text-sm">Alvear 585, San Cristobal, Santa Fe</p>
-                                <p class="text-gray-500 text-sm">CUIT:
-                                    {{ optional($reparacion->cliente)->cuit_dni ?? 'Sin dato' }}</p>
-                            </div>
+            <div class="w-full max-w-[210mm]">
+
+                <!-- BOTONES -->
+                <div class="flex justify-end gap-3 mb-6 no-print">
+
+                    <a href="{{ route('reparaciones.export.pdf', $reparacion->id) }}" target="_blank"
+                        class="px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-800 transition">
+                        Exportar PDF
+                    </a>
+
+                    <a href="{{ route('reparaciones.edit', $reparacion->id) }}"
+                        class="px-4 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-900 transition">
+                        Editar Reparación
+                    </a>
+
+                </div>
+
+
+                <!-- HOJA A4 -->
+                <div class="a4 shadow-xl px-16 py-14 text-gray-800 bg-white">
+
+                    <!-- HEADER EMPRESA -->
+                    <div class="flex justify-between items-start border-b pb-6 mb-8">
+                        <div>
+                            <h1 class="text-2xl font-bold tracking-tight">RDM</h1>
+                            <p class="text-sm text-gray-500">Alvear 585 - San Cristóbal</p>
+                            <p class="text-sm text-gray-500">
+                                CUIT: {{ optional($reparacion->cliente)->cuit_dni ?? '-' }}
+                            </p>
                         </div>
 
-
-                        <div class="max-w-md text-left sm:text-right">
-                            <h2 class="text-2xl font-extrabold text-blue-600 mb-2">DETALLE DE REPARACIÓN</h2>
-                            <div class="bg-gray-100 p-4 rounded-xl">
-                                <p class="text-gray-700 text-sm font-semibold mb-1">
-                                    Fecha Ingreso: <span
-                                        class="text-gray-900 font-bold text-base">{{ \Carbon\Carbon::parse($reparacion->fecha_ingreso)->format('d/m/Y') }}</span>
-                                    | Reparación n°: <span
-                                        class="text-gray-900 font-bold text-base">{{ $reparacion->id }}</span>
-                                </p>
-                                <p class="text-gray-900 font-bold text-base">| Cod: <span class="text-gray-900 font-bold text-base">{{ $reparacion->codigo_unico }}</span></p>
-                                <p class="text-gray-700 text-sm font-semibold mb-1">
-                                    Estado: <span
-                                        class="text-gray-900 font-bold text-base">{{ $reparacion->estado_reparacion }}</span>
-                                    | Reparable: <span
-                                        class="text-gray-900 font-bold text-base">{{ $reparacion->reparable ? 'Sí' : 'No' }}</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Datos del Cliente -->
-                    <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-10">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Datos del Cliente</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                            <div>
-                                <p><strong>Razón Social:</strong>
-                                    {{ optional($reparacion->cliente)->RazonSocial ?? 'Sin dato' }}</p>
-                                <p><strong>Domicilio:</strong> {{ optional($reparacion->cliente)->Domicilio ?? '' }}</p>
-                                <p><strong>Localidad:</strong> {{ optional($reparacion->cliente)->Localidad ?? '' }}
-                                </p>
-                            </div>
-                            <div>
-                                <p><strong>CUIT/DNI:</strong>
-                                    {{ optional($reparacion->cliente)->cuit_dni ?? 'Sin dato' }}</p>
-                                <p><strong>Teléfono:</strong> {{ optional($reparacion->cliente)->Telefono ?? '' }}</p>
-                                <p><strong>Tipo Cliente:</strong>
-                                    {{ optional($reparacion->cliente)->TipoCliente ?? '' }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botones de Exportar -->
-                    <div class="flex justify-end gap-4 mb-4">
-                        <a href="{{ route('reparaciones.export.pdf', $reparacion->id) }}" target="_blank"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 flex items-center">
-                            <i class="fas fa-file-pdf mr-2"></i> Exportar PDF
-                        </a>
-
-                        {{-- <a href="{{ route('ventas.export.excel', $venta->id) }}"
-                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 flex items-center">
-                            <i class="fas fa-file-excel mr-2"></i> Exportar Excel
-                        </a> --}}
-                    </div>
-
-                    <!-- Sección de Detalles de la Reparación -->
-                    <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-10">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Detalles de la Reparación</h3>
-
-                        <!-- Primera fila: Equipo, Marca y Modelo -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 mb-4">
-                            <div>
-                                <p><strong>Descripción del Equipo:</strong> {{ $reparacion->equipo_descripcion }}</p>
-                                <p><strong>Marca:</strong> {{ $reparacion->equipo_marca ?? 'Sin dato' }}</p>
-                                <p><strong>Modelo:</strong> {{ $reparacion->equipo_modelo ?? 'Sin dato' }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Segunda fila: Daño y Solución (ocupan todo el ancho) -->
-                        <div class="text-sm text-gray-700">
-                            <p class="mb-2"><strong>Descripción del Daño:</strong>
-                                {{ $reparacion->descripcion_danio }}</p>
-                            <p><strong>Solución Aplicada:</strong> {{ $reparacion->solucion_aplicada ?? 'Sin dato' }}
+                        <div class="text-right">
+                            <h2 class="text-lg font-semibold uppercase tracking-wide">
+                                Orden de Reparación
+                            </h2>
+                            <p class="text-sm mt-2">
+                                Nº {{ $reparacion->id }}
+                            </p>
+                            <p class="text-sm">
+                                Código: {{ $reparacion->codigo_unico }}
+                            </p>
+                            <p class="text-sm">
+                                Fecha: {{ \Carbon\Carbon::parse($reparacion->fecha_ingreso)->format('d/m/Y') }}
                             </p>
                         </div>
                     </div>
 
+                    <!-- CLIENTE -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-3 border-b pb-2">
+                            Datos del Cliente
+                        </h3>
 
-                    <!-- Detalle de Servicios -->
-                    <div class="mb-10">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Servicios Aplicados</h3>
-                        <div class="overflow-x-auto rounded-lg shadow-sm">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-blue-600 text-white">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Servicio</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Cantidad</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Precio Unitario</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse ($reparacion->reparacionServicios as $rs)
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                {{ $rs->servicio->nombre ?? 'Sin Servicio' }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $rs->cantidad }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                ${{ number_format($rs->precio, 2, ',', '.') }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                ${{ number_format($rs->cantidad * $rs->precio, 2, ',', '.') }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay
-                                                servicios asociados.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="grid grid-cols-2 gap-6 text-sm">
+                            <div>
+                                <p><strong>Razón Social:</strong>
+                                    {{ optional($reparacion->cliente)->RazonSocial ?? 'Sin dato' }}
+                                </p>
+
+                                <p><strong>Nombre:</strong>
+                                    {{ optional($reparacion->cliente)->nombreCompleto ?? 'Sin dato' }}
+                                </p>
+
+                                <p><strong>Tipo Cliente:</strong>
+                                    {{ optional($reparacion->cliente)->TipoCliente ?? 'Sin dato' }}
+                                </p>
+
+                                <p><strong>CUIT/DNI:</strong>
+                                    {{ optional($reparacion->cliente)->cuit_dni ?? 'Sin dato' }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p><strong>Localidad:</strong>
+                                    {{ optional($reparacion->cliente)->Localidad ?? 'Sin dato' }}
+                                </p>
+
+                                <p><strong>Domicilio:</strong>
+                                    {{ optional($reparacion->cliente)->Domicilio ?? '-' }}
+                                </p>
+                                <p><strong>Teléfono:</strong>
+                                    {{ optional($reparacion->cliente)->Telefono ?? '-' }}
+                                </p>
+                                <p><strong>Email:</strong>
+                                    {{ optional($reparacion->cliente)->Email ?? '-' }}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Detalle de Productos -->
-                    <div class="mb-10">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Utilizados</h3>
-                        <div class="overflow-x-auto rounded-lg shadow-sm">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-blue-600 text-white">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Producto</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Cantidad</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Precio Unitario</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                                            Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse ($reparacion->reparacionProductos as $rp)
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                {{ $rp->producto->nombre ?? 'Sin Producto' }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $rp->cantidad }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                ${{ number_format($rp->precio, 2, ',', '.') }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                ${{ number_format($rp->cantidad * $rp->precio, 2, ',', '.') }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay
-                                                productos asociados.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                    <!-- EQUIPO -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-3 border-b pb-2">
+                            Datos del Equipo
+                        </h3>
+
+                        <div class="text-sm space-y-2">
+                            <p><strong>Descripción:</strong> {{ $reparacion->equipo_descripcion }}</p>
+                            <p><strong>Marca:</strong> {{ $reparacion->equipo_marca ?? '-' }}</p>
+                            <p><strong>Modelo:</strong> {{ $reparacion->equipo_modelo ?? '-' }}</p>
+                            <p><strong>Estado:</strong> {{ $reparacion->estado_reparacion }}</p>
+                            <p><strong>Reparable:</strong> {{ $reparacion->reparable ? 'Sí' : 'No' }}</p>
                         </div>
                     </div>
 
-                    <!-- Totales -->
+                    <!-- DIAGNÓSTICO -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-3 border-b pb-2">
+                            Diagnóstico
+                        </h3>
+
+                        <div class="text-sm space-y-4">
+                            <div>
+                                <p class="font-semibold mb-1">Descripción del Daño</p>
+                                <p class="border p-3 rounded bg-gray-50">
+                                    {{ $reparacion->descripcion_danio }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="font-semibold mb-1">Solución Aplicada</p>
+                                <p class="border p-3 rounded bg-gray-50">
+                                    {{ $reparacion->solucion_aplicada ?? 'Sin dato' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCTOS -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-3 border-b pb-2">
+                            Productos Utilizados
+                        </h3>
+
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-2">Producto</th>
+                                    <th class="text-right py-2">Cant.</th>
+                                    <th class="text-right py-2">Precio</th>
+                                    <th class="text-right py-2">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($reparacion->reparacionProductos as $rp)
+                                    <tr class="border-b">
+                                        <td class="py-2">{{ $rp->producto->nombre ?? '-' }}</td>
+                                        <td class="text-right">{{ $rp->cantidad }}</td>
+                                        <td class="text-right">${{ number_format($rp->precio, 2, ',', '.') }}</td>
+                                        <td class="text-right">
+                                            ${{ number_format($rp->cantidad * $rp->precio, 2, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-gray-400">
+                                            Sin productos
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- SERVICIOS -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-3 border-b pb-2">
+                            Servicios Aplicados
+                        </h3>
+
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-2">Servicio</th>
+                                    <th class="text-right py-2">Cant.</th>
+                                    <th class="text-right py-2">Precio</th>
+                                    <th class="text-right py-2">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($reparacion->reparacionServicios as $rs)
+                                    <tr class="border-b">
+                                        <td class="py-2">{{ $rs->servicio->nombre ?? '-' }}</td>
+                                        <td class="text-right">{{ $rs->cantidad }}</td>
+                                        <td class="text-right">${{ number_format($rs->precio, 2, ',', '.') }}</td>
+                                        <td class="text-right">
+                                            ${{ number_format($rs->cantidad * $rs->precio, 2, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-gray-400">
+                                            Sin servicios
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TOTALES -->
                     @php
                         $subtotalProductos = $reparacion->reparacionProductos->sum(
                             fn($rp) => $rp->cantidad * $rp->precio,
@@ -203,28 +236,32 @@
                         $total = $subtotalProductos + $subtotalServicios;
                     @endphp
 
-                    <div class="flex justify-end mt-8">
-                        <div class="w-full sm:w-1/2">
-                            <div class="flex justify-between mb-2"><span class="text-gray-700">Subtotal
-                                    Productos:</span><span
-                                    class="text-gray-900 font-medium">${{ number_format($subtotalProductos, 2, ',', '.') }}</span>
+                    <div class="flex justify-end mt-10">
+                        <div class="w-64 text-sm">
+                            <div class="flex justify-between mb-2">
+                                <span>Subtotal Productos</span>
+                                <span>${{ number_format($subtotalProductos, 2, ',', '.') }}</span>
                             </div>
-                            <div class="flex justify-between mb-2"><span class="text-gray-700">Subtotal
-                                    Servicios:</span><span
-                                    class="text-gray-900 font-medium">${{ number_format($subtotalServicios, 2, ',', '.') }}</span>
+
+                            <div class="flex justify-between mb-2">
+                                <span>Subtotal Servicios</span>
+                                <span>${{ number_format($subtotalServicios, 2, ',', '.') }}</span>
                             </div>
-                            <div class="flex justify-between py-4 border-t-2 border-b-2 border-gray-200 mt-4"><span
-                                    class="text-xl font-bold text-gray-800">Total a Pagar:</span><span
-                                    class="text-2xl font-extrabold text-green-600">${{ number_format($total, 2, ',', '.') }}</span>
+
+                            <div class="flex justify-between border-t pt-3 font-semibold text-base">
+                                <span>Total</span>
+                                <span>${{ number_format($total, 2, ',', '.') }}</span>
                             </div>
                         </div>
                     </div>
 
                 </div>
             </div>
+
         </main>
     </div>
 
 </body>
+
 
 </html>
