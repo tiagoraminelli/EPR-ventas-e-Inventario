@@ -75,7 +75,7 @@
             <div class="max-w-7xl mx-auto space-y-6">
                 <!-- Header con título y fecha -->
                 <div class="flex justify-between items-center mb-2">
-                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">PANEL DE CONTROL GENERAL</h1>
                     <p class="text-sm text-gray-500">{{ now()->format('d/m/Y') }}</p>
                 </div>
 
