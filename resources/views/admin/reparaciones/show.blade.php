@@ -51,6 +51,7 @@
                         <div>
                             <h1 class="text-2xl font-bold tracking-tight">RDM</h1>
                             <p class="text-sm text-gray-500">Alvear 585 - San Cristóbal</p>
+                            <p class="text-sm text-gray-500">Ficha de Reparación: </p>
                             <p class="text-sm text-gray-500">
                                 CUIT: {{ optional($reparacion->cliente)->cuit_dni ?? '-' }}
                             </p>
