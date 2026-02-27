@@ -189,7 +189,7 @@
                                             <!-- VER -->
                                             <a href="{{ route('ventas.show', $venta->id) }}"
                                                 onclick="event.stopPropagation()" title="Ver detalles">
-                                                <i class="fas fa-eye text-green-600"></i>
+                                                <i class="fas fa-eye text-black-600"></i>
                                             </a>
 
                                             <!-- EDITAR -->
