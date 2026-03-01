@@ -42,32 +42,37 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <a href="{{ route('products.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-boxes text-gray-400 mb-3"></i>
-                    <p class="font-medium">Productos</p>
+                    <p class="font-medium">Panel de Productos</p>
                 </a>
 
                 <a href="{{ route('ventas.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-shopping-cart text-gray-400 mb-3"></i>
-                    <p class="font-medium">Ventas</p>
+                    <p class="font-medium">Panel de Ventas</p>
+                </a>
+
+                <a href="{{ route('reparaciones.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-wrench text-gray-400 mb-3"></i>
+                    <p class="font-medium">Panel de Reparaciones</p>
                 </a>
 
                 <a href="{{ route('clientes.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-user text-gray-400 mb-3"></i>
-                    <p class="font-medium">Clientes</p>
+                    <p class="font-medium">Panel de Clientes</p>
                 </a>
 
                 <a href="{{ route('marcas.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-tags text-gray-400 mb-3"></i>
-                    <p class="font-medium">Marcas</p>
+                    <p class="font-medium">Panel de Marcas</p>
                 </a>
 
                 <a href="{{ route('categorias.index') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-list text-gray-400 mb-3"></i>
-                    <p class="font-medium">Categorías</p>
+                    <p class="font-medium">Panel de Categorías</p>
                 </a>
 
                 <a href="{{ route('admin.graficos') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-chart-line text-gray-400 mb-3"></i>
-                    <p class="font-medium">Gráficos</p>
+                    <p class="font-medium">Panel de Gráficos e Estadísticas</p>
                 </a>
             </div>
         </section>
@@ -87,6 +92,11 @@
                 <a href="{{ route('ventas.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
                     <i class="fas fa-cart-plus text-gray-400 mb-3"></i>
                     <p class="font-medium">Nueva venta</p>
+                </a>
+
+                <a href="{{ route('reparaciones.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
+                    <i class="fas fa-wrench text-gray-400 mb-3"></i>
+                    <p class="font-medium">Nueva reparación</p>
                 </a>
 
                 <a href="{{ route('clientes.create') }}" class="border rounded-lg p-5 hover:bg-gray-100 transition">
